@@ -1,6 +1,6 @@
 import jwt,{ JwtPayload } from "jsonwebtoken";
 
-const jwt_secret = "debu123"
+const jwt_secret = process.env.JWT_SECRATE as string;
 
 interface CustomJwtPayload extends JwtPayload{
     id: number

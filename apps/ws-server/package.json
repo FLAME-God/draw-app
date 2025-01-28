@@ -17,6 +17,7 @@
   "description": "",
   "devDependencies": {
     "@types/ws": "^8.5.14",
-    "@repo/typescript-config": "*"
+    "@repo/typescript-config": "*",
+    "@repo/common":"*"
   }
 }
