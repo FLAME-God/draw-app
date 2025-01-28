@@ -7,7 +7,8 @@ const signup =(req: Request, res: Response)=>{
 
     res.json({
         username,
-        email
+        email,
+        password
     })
 }
 
