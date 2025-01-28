@@ -1,6 +1,14 @@
 import { Request, Response } from "express";
+import {createUserSchema} from "@repo/common/type";
 
 const signup =(req: Request, res: Response)=>{
+    const data = createUserSchema.safeParse(req.body);
+    if(!data){
+        res.json({
+            message:"Incorrect Input"
+        });
+        return;
+    }
     const username = req.body.username;
     const email = req.body.email;
     const password = req.body.username;
