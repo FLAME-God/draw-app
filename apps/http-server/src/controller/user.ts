@@ -1,32 +1,61 @@
 import { Request, Response } from "express";
-import {createUserSchema} from "@repo/common/type";
+import {createUserSchema} from "@repo/common/schema";
+import { createUser, findUser } from "../service/user";
+import { comparePassword, hashPassword } from "../lib/hashedPasssord";
+import { createToken } from "@repo/backend-common/token";
 
-const signup =(req: Request, res: Response)=>{
-    const data = createUserSchema.safeParse(req.body);
-    if(!data){
+const signup = async(req: Request, res: Response)=>{
+    const verifyInput = createUserSchema.safeParse(req.body);
+    if(!verifyInput.success){
         res.json({
             message:"Incorrect Input"
         });
         return;
     }
-    const username = req.body.username;
-    const email = req.body.email;
-    const password = req.body.username;
+    const {username, email, password}= verifyInput.data;
+    
+    try {
+        const hashedPassword: string = await hashPassword(password);
+        const payload = {
+            username,
+            email,
+            hashedPassword
+        }
+        const user = await createUser(payload);
 
-    res.json({
-        username,
-        email,
-        password
-    })
+        res.status(200).json({
+            message: "User registered Successfully",
+            user
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:"User not created Internal server error"
+        })    
+    }
 }
 
-const signin = (req: Request, res: Response)=>{
+const signin = async(req: Request, res: Response)=>{
     const email = req.body.email;
     const password = req.body.password;
-
-    res.json({
-        email
-    })
+    try {
+        const foundUser = await findUser({email});
+        const hashedPasssord = foundUser.password;
+        const passwordMatch = await comparePassword(password, hashedPasssord);
+        if(!passwordMatch){
+            res.status(404).json({
+                message:"Incorrect Password or email"
+            })
+        }
+        const token = createToken({id: foundUser.id as string});
+        res.status(200).json({
+            message: "User Logined Successfully",
+            token: token
+        })
+    } catch (error) {
+        res.status(500).json({
+            messgae: "Bad Request"
+        })
+    }
 }
 
 export default {signup, signin};
